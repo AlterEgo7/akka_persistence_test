@@ -60,12 +60,18 @@ class AccountPersistentActor extends PersistentActor {
   override def receiveCommand: Receive = {
     case DebitAccount(amount) => persist(AccountDebited(amount)) { event =>
       updateState(event)
-      logger.info(s"Actor $persistenceId: Balance = ${state.balance.right.get}")
+      state.balance match {
+        case Left(_)  => logger.error(s"Actor $persistenceId: Insufficient funds")
+        case Right(value) => logger.info(s"Actor $persistenceId: Balance = $value")
+      }
       context.system.eventStream.publish(event)
     }
     case CreditAccount(amount) => persist(AccountCredited(amount)) { event =>
       updateState(event)
-      logger.info(s"Actor $persistenceId: Balance = ${state.balance.right.get}")
+      state.balance match {
+        case Left(_)  => logger.error(s"Actor $persistenceId: Insufficient funds")
+        case Right(value) => logger.info(s"Actor $persistenceId: Balance = $value")
+      }
       context.system.eventStream.publish(event)
     }
   }
@@ -79,7 +85,6 @@ class AccountPersistentActor extends PersistentActor {
 object BankAccountExample extends App {
 
   val system = ActorSystem("account_example")
-//  val persistentActor = system.actorOf(Props[AccountPersistentActor], "account-actor-1")
 
   val actors = (for (
     i <- Range(1, 20)
