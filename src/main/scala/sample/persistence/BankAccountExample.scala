@@ -61,16 +61,16 @@ class AccountPersistentActor extends PersistentActor {
     case DebitAccount(amount) => persist(AccountDebited(amount)) { event =>
       updateState(event)
       state.balance match {
-        case Left(_)  => logger.error(s"Actor $persistenceId: Insufficient funds")
-        case Right(value) => logger.info(s"Actor $persistenceId: Balance = $value")
+        case Left(_)  => logger.error(s"Insufficient funds")
+        case Right(value) => logger.info(s"Balance = $value")
       }
       context.system.eventStream.publish(event)
     }
     case CreditAccount(amount) => persist(AccountCredited(amount)) { event =>
       updateState(event)
       state.balance match {
-        case Left(_)  => logger.error(s"Actor $persistenceId: Insufficient funds")
-        case Right(value) => logger.info(s"Actor $persistenceId: Balance = $value")
+        case Left(_)  => logger.error(s"Insufficient funds")
+        case Right(value) => logger.info(s"Balance = $value")
       }
       context.system.eventStream.publish(event)
     }
@@ -103,9 +103,11 @@ object BankAccountExample extends App {
     order <- orders
   } yield actor ! order
 
-  Thread.sleep(2000)
+  Thread.sleep(5000)
 
   system.terminate()
+
+  Thread.sleep(Long.MaxValue)
 }
 
 class AccountEventStringSerializer extends SerializerWithStringManifest {
