@@ -70,7 +70,10 @@ class AccountPersistentActor extends PersistentActor {
     }
   }
 
-  override def persistenceId: String = self.path.name
+  override def persistenceId: String = {
+    val hostName = java.net.InetAddress.getLocalHost.getHostName
+    s"$hostName - ${self.path.name}"
+  }
 }
 
 object BankAccountExample extends App {
@@ -84,10 +87,10 @@ object BankAccountExample extends App {
 
   val orders = Stream(
     DebitAccount(100),
-    CreditAccount(25),
-    CreditAccount(75),
+    DebitAccount(25),
+    CreditAccount(115),
     DebitAccount(50),
-    CreditAccount(50)
+    CreditAccount(60)
   )
 
   for {
@@ -95,7 +98,7 @@ object BankAccountExample extends App {
     order <- orders
   } yield actor ! order
 
-  Thread.sleep(10000)
+  Thread.sleep(2000)
 
   system.terminate()
 }
