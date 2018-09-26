@@ -2,7 +2,7 @@ package sample.persistence
 
 import java.nio.charset.StandardCharsets
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{Actor, ActorSystem, Props}
 import akka.persistence.{PersistentActor, SnapshotOffer}
 import akka.serialization.SerializerWithStringManifest
 import com.typesafe.scalalogging.Logger
@@ -79,9 +79,21 @@ class AccountPersistentActor extends PersistentActor {
   }
 }
 
+class AccountEventActor extends Actor {
+  val logger = Logger("Event listener actor")
+
+  override def receive: Receive = {
+    case AccountDebited(amount) => logger.info(s"Picked from event bus: Account Debited for $amount")
+    case AccountCredited(amount) => logger.info(s"Picked from event bus: Account Credited for $amount")
+  }
+}
+
 object BankAccountExample extends App {
 
   val system = ActorSystem("account_example")
+
+  val listener = system.actorOf(Props[AccountEventActor])
+  system.eventStream.subscribe(listener, classOf[AccountEvent])
 
   val actors = (for (
     i <- Range(1, 20)
