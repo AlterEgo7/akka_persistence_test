@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+// Brought in from scalapb-runtime
+import "scalapb/scalapb.proto";
+import "google/protobuf/wrappers.proto";
+
+package sample.persistence;
+
+message AccountDebited {
+    option (scalapb.message).extends = "sample.persistence.AccountEvent";
+    double amount = 1;
+}
+
+message AccountCredited {
+    option (scalapb.message).extends = "sample.persistence.AccountEvent";
+    double amount = 1;
+}

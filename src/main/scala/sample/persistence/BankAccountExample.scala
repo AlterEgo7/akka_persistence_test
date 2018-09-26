@@ -6,6 +6,7 @@ import akka.actor.{ActorSystem, Props}
 import akka.persistence.{PersistentActor, SnapshotOffer}
 import akka.serialization.SerializerWithStringManifest
 import com.typesafe.scalalogging.Logger
+import models._
 
 sealed trait AccountCommand {
   def amount: Double
@@ -16,13 +17,9 @@ case class DebitAccount(amount: Double) extends AccountCommand
 case class CreditAccount(amount: Double) extends AccountCommand
 
 
-sealed trait AccountEvent {
+trait AccountEvent {
   def amount: Double
 }
-
-case class AccountDebited(amount: Double) extends AccountEvent
-
-case class AccountCredited(amount: Double) extends AccountEvent
 
 case class State(events: Seq[AccountEvent] = Stream()) {
   def updated(event: AccountEvent): State = copy(event +: events)
@@ -106,8 +103,6 @@ object BankAccountExample extends App {
   Thread.sleep(5000)
 
   system.terminate()
-
-  Thread.sleep(Long.MaxValue)
 }
 
 class AccountEventStringSerializer extends SerializerWithStringManifest {
