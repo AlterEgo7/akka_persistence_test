@@ -6,6 +6,16 @@ import "google/protobuf/wrappers.proto";
 
 package sample.persistence;
 
+option (scalapb.options) = {
+    flat_package: true
+    single_file: true
+    preamble: [
+    "sealed trait AccountEvent {",
+    "  def amount: Double",
+    "}"
+    ];
+};
+
 message AccountDebited {
     option (scalapb.message).extends = "sample.persistence.AccountEvent";
     double amount = 1;
