@@ -37,8 +37,5 @@ class AccountPersistentActor extends PersistentActor {
     }
   }
 
-  override def persistenceId: String = {
-    val hostName = java.net.InetAddress.getLocalHost.getHostName
-    s"$hostName - ${self.path.name}"
-  }
+  override def persistenceId: String = "account-actor"
 }

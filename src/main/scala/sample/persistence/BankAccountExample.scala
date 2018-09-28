@@ -2,6 +2,8 @@ package sample.persistence
 
 import akka.actor.{ActorSystem, Props}
 
+import scala.util.Random
+
 sealed trait AccountCommand {
   def amount: Double
 }
@@ -36,8 +38,10 @@ object BankAccountExample extends App {
   val listener = system.actorOf(Props[AccountEventActor])
   system.eventStream.subscribe(listener, classOf[AccountEvent])
 
+  val queryActor = system.actorOf(Props[AccountEventQueryActor])
+
   val actors = (for (
-    i <- Range(1, 20)
+    i <- 1 to 20
   ) yield system.actorOf(Props[AccountPersistentActor], s"account-actor-$i")).par
 
   val orders = Stream(
@@ -45,7 +49,7 @@ object BankAccountExample extends App {
     DebitAccount(25),
     CreditAccount(115),
     DebitAccount(50),
-    CreditAccount(60)
+    CreditAccount(Random.nextInt(6000) / 100)
   )
 
   for {
@@ -53,7 +57,11 @@ object BankAccountExample extends App {
     order <- orders
   } yield actor ! order
 
-  Thread.sleep(5000)
+  Thread.sleep(2500)
+
+  queryActor ! AccountEventQueryActor.RunQuery
+
+  Thread.sleep(1000)
 
   system.terminate()
 }
